@@ -24,7 +24,6 @@ double start[2] = {0.305, 1.219}; /* start location */
 double goal[2] = {3.658, 1.829}; /* goal location */
 
 void moveStraight(double distance){
-	InitEV3();
 	// Notes: 360 motor rotations = 1 wheel rotation
 	// wheels r = 0.0275 m, c = 2*M_PI*r
 	double r = 0.0275; //radius of wheel in meters
@@ -42,7 +41,6 @@ void moveStraight(double distance){
 	OnFwdSync(OUT_BC, 5);
 	}
 	Off(OUT_BC);
-	FreeEV3();
 }
 
 int main(void)
