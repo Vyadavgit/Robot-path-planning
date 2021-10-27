@@ -29,7 +29,7 @@ int main(void)
 	//      please update the API or use the "Hello World EV3 Project Old API" as template.
 
 	// Notes: 360 motor rotations = 1 wheel rotation
-	// tire r = 0.025 m, c = 2*M_PI*r
+	// tire r = 0.0275 m, c = 2*M_PI*r
 
 
 	InitEV3();
