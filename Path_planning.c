@@ -34,7 +34,7 @@ int main(void)
 
 	InitEV3();
 	//TODO Place here your variables
-	double r = 0.025; //radius of wheel in meters
+	double r = 0.0275; //radius of wheel in meters
 	double c; //circumference of wheel [meters]
 	double distance; // distance to travel
 	double rotations_motor; // motor rotations needed to travel the distance
@@ -45,7 +45,6 @@ int main(void)
 	rotations_motor = (360*distance)/c; // rotations needed ?
 										// 360 [motor rotations] = circumference(c) [distance traveled]
 										// that implies x [distance] = (360*x)/c [rotations] needed
-
 
 	ResetRotationCount(OUT_B);
 	ResetRotationCount(OUT_C);
