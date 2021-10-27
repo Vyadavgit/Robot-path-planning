@@ -23,25 +23,14 @@ double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
 double start[2] = {0.305, 1.219}; /* start location */
 double goal[2] = {3.658, 1.829}; /* goal location */
 
-int main(void)
-{
-	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
-	//      please update the API or use the "Hello World EV3 Project Old API" as template.
-
+void moveStraight(double distance){
 	// Notes: 360 motor rotations = 1 wheel rotation
-	// tire r = 0.0275 m, c = 2*M_PI*r
-
-
-	InitEV3();
-	//TODO Place here your variables
+	// wheels r = 0.0275 m, c = 2*M_PI*r
 	double r = 0.0275; //radius of wheel in meters
 	double c; //circumference of wheel [meters]
-	double distance; // distance to travel
 	double rotations_motor; // motor rotations needed to travel the distance
 
-	//TODO Place here your code
 	c = 2*M_PI*r; // circumference
-	distance = 0.30;
 	rotations_motor = (360*distance)/c; // rotations needed ?
 										// 360 [motor rotations] = circumference(c) [distance traveled]
 										// that implies x [distance] = (360*x)/c [rotations] needed
@@ -50,11 +39,31 @@ int main(void)
 	ResetRotationCount(OUT_C);
 	while (MotorRotationCount(OUT_B)<(rotations_motor+1) && MotorRotationCount(OUT_C)<(rotations_motor+1)) {
 	OnFwdSync(OUT_BC, 5);
-	TermPrintf("B: %d, C: %d\n", MotorRotationCount(OUT_B), MotorRotationCount(OUT_C));
 	}
 	Off(OUT_BC);
+}
 
-	Wait(5000);
+void rotateFn(int output, int angle){
+	RotateMotor(output, 5, ((420*angle)/90)); // OUT_B - move right, OUT_C - move left, Observation: 420 [<Angle>] = 90 degrees rotation
+											  // => (420*x)/90 = x degrees rotation
+}
+
+int main(void)
+{
+	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
+	//      please update the API or use the "Hello World EV3 Project Old API" as template.
+
+	InitEV3();
+
+	//TODO Place here your variables
+	double distance = 0.10; // distance to travel
+	int angle = 180; // rotation in degrees
+
+	//TODO Place here your code
+	moveStraight(distance);
+	rotateFn(OUT_C, angle);
+
+	Wait(500);
 
 	FreeEV3();
 	return 0;
