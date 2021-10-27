@@ -23,25 +23,15 @@ double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
 double start[2] = {0.305, 1.219}; /* start location */
 double goal[2] = {3.658, 1.829}; /* goal location */
 
-int main(void)
-{
-	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
-	//      please update the API or use the "Hello World EV3 Project Old API" as template.
-
-	// Notes: 360 motor rotations = 1 wheel rotation
-	// tire r = 0.0275 m, c = 2*M_PI*r
-
-
+void moveStraight(double distance){
 	InitEV3();
-	//TODO Place here your variables
+	// Notes: 360 motor rotations = 1 wheel rotation
+	// wheels r = 0.0275 m, c = 2*M_PI*r
 	double r = 0.0275; //radius of wheel in meters
 	double c; //circumference of wheel [meters]
-	double distance; // distance to travel
 	double rotations_motor; // motor rotations needed to travel the distance
 
-	//TODO Place here your code
 	c = 2*M_PI*r; // circumference
-	distance = 0.30;
 	rotations_motor = (360*distance)/c; // rotations needed ?
 										// 360 [motor rotations] = circumference(c) [distance traveled]
 										// that implies x [distance] = (360*x)/c [rotations] needed
@@ -50,9 +40,23 @@ int main(void)
 	ResetRotationCount(OUT_C);
 	while (MotorRotationCount(OUT_B)<(rotations_motor+1) && MotorRotationCount(OUT_C)<(rotations_motor+1)) {
 	OnFwdSync(OUT_BC, 5);
-	TermPrintf("B: %d, C: %d\n", MotorRotationCount(OUT_B), MotorRotationCount(OUT_C));
 	}
 	Off(OUT_BC);
+	FreeEV3();
+}
+
+int main(void)
+{
+	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
+	//      please update the API or use the "Hello World EV3 Project Old API" as template.
+
+	InitEV3();
+
+	//TODO Place here your variables
+	double distance = 0.15; // distance to travel
+
+	//TODO Place here your code
+	moveStraight(distance);
 
 	Wait(5000);
 
