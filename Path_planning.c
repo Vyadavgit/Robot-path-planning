@@ -43,6 +43,11 @@ void moveStraight(double distance){
 	Off(OUT_BC);
 }
 
+void rotateFn(int output, int angle){
+	RotateMotor(output, 5, ((420*angle)/90)); // OUT_B - move right, OUT_C - move left, Observation: 420 [<Angle>] = 90 degrees rotation
+											  // => (420*x)/90 = x degrees rotation
+}
+
 int main(void)
 {
 	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
@@ -51,12 +56,14 @@ int main(void)
 	InitEV3();
 
 	//TODO Place here your variables
-	double distance = 0.15; // distance to travel
+	double distance = 0.10; // distance to travel
+	int angle = 180; // rotation in degrees
 
 	//TODO Place here your code
 	moveStraight(distance);
+	rotateFn(OUT_C, angle);
 
-	Wait(5000);
+	Wait(500);
 
 	FreeEV3();
 	return 0;
