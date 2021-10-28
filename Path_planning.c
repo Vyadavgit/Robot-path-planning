@@ -41,14 +41,14 @@ void moveStraight(double distance){
 	ResetRotationCount(OUT_B);
 	ResetRotationCount(OUT_C);
 	while (MotorRotationCount(OUT_B)<(rotations_motor+1) && MotorRotationCount(OUT_C)<(rotations_motor+1)) {
-	OnFwdSync(OUT_BC, 5);
+	OnFwdSync(OUT_BC, 25);
 	}
 	Off(OUT_BC);
 }
 
 void rotateFn(int output, int angle){
-	RotateMotor(output, 5, ((420*angle)/90)); // OUT_B - move right, OUT_C - move left, Observation: 420 [<Angle>] = 90 degrees rotation
-											  // => (420*x)/90 = x degrees rotation
+	RotateMotor(output, 13, ((400*angle)/90)); // OUT_B - move right, OUT_C - move left, Observation: 400 [<Angle>] = 90 degrees rotation
+											  // => (400*x)/90 = x degrees rotation
 }
 
 //double angleToRotate(double initial[2], double final[2]){
@@ -166,6 +166,11 @@ void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
     }
 }
 
+void moveX1Y1toX2Y2(double initialLocation[2],double goalLocation[2]){
+	moveAlongXaxis(initialLocation, goalLocation);
+	moveAlongYaxis(initialLocation, goalLocation);
+}
+
 
 int main(void)
 {
@@ -185,12 +190,11 @@ int main(void)
 
 	// Visiblity graph algorithm
 	double X1Y1[2] = {0,0};
-	double X2Y2[2] = {0.15,-0.15};
+	double X2Y2[2] = {0.305*3,0.305*3};
 
-    moveAlongXaxis(X1Y1, X2Y2);
-    moveAlongYaxis(X1Y1, X2Y2);
+    moveX1Y1toX2Y2(X1Y1, X2Y2);
 
-	Wait(5000);
+	Wait(500);
 	FreeEV3();
 //	TermPrintf("Press ENTER to exit");
 	return 0;
