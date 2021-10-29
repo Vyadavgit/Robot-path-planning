@@ -5,12 +5,13 @@
  \brief		Simple Hello World! for the Ev3
 */
 
-#include <ev3.h>
+#include <stdio.h>
+#include <math.h>
 
 #define M_PI 3.1415927
 #define MAX_OBSTACLES 25 /* maximum number of obstacles */
 
-int num_obstacles = 13; /* number of obstacles */
+int num_obstacles = 3; /* number of obstacles */
 
 double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
 {{0.305*2, 0.305*2},{0.305*3, 0.305*3},{0.305*4, 0.305*4},{-1,-1},{-1,-1},
@@ -29,151 +30,6 @@ int alreadyFoundObstacle[MAX_OBSTACLES]; // only stores the rows of obstacle arr
 int i=0;
 
 double sqrt(double arg);
-
-void moveStraight(double distance){
-	// Notes: 360 motor rotations = 1 wheel rotation
-	// wheels r = 0.0275 m, c = 2*M_PI*r
-	double r = 0.0275; //radius of wheel in meters
-	double c; //circumference of wheel [meters]
-	double rotations_motor; // motor rotations needed to travel the distance
-
-	c = 2*M_PI*r; // circumference
-	rotations_motor = (360*distance)/c; // rotations needed ?
-										// 360 [motor rotations] = circumference(c) [distance traveled]
-										// that implies x [distance] = (360*x)/c [rotations] needed
-
-	ResetRotationCount(OUT_B);
-	ResetRotationCount(OUT_C);
-	while (MotorRotationCount(OUT_B)<(rotations_motor+1) && MotorRotationCount(OUT_C)<(rotations_motor+1)) {
-	OnFwdSync(OUT_BC, 25);
-	}
-	Off(OUT_BC);
-}
-
-void rotateFn(int output, int angle){
-	RotateMotor(output, 13, ((400*angle)/90)); // OUT_B - move right, OUT_C - move left, Observation: 400 [<Angle>] = 90 degrees rotation
-											  // => (400*x)/90 = x degrees rotation
-}
-
-//double angleToRotate(double initial[2], double final[2]){
-//	double Rangle = atan((final[1]-initial[1])/(final[0]-initial[0]));
-//	TermPrintf("Rotation angle: %f\n", Rangle);
-//	Wait(5000);
-//	return Rangle;
-//}
-
-// move along X-axis
-void moveAlongXaxis(double initialLocation[2],double goalLocation[2]){
-    double Xdistance = goalLocation[0]-initialLocation[0]; // x2-x1
-    TermPrintf("Current angle: %d\n", currAngle);
-    TermPrintf("Xdistance: %f\n", Xdistance);
-
-	if (Xdistance>0){ //x2-x1 > 0  => rotate to angle 0 and move straight towards +ve X-axis
-            if(currAngle==0){
-            	// continue
-            }
-            else if (currAngle==90){
-                rotateFn(OUT_B, 90);
-            }
-            else if(currAngle==180){
-                rotateFn(OUT_B, 180);
-            }
-            else if(currAngle==270){
-                rotateFn(OUT_C, 90);
-            }
-            else { // i.e. currAngle==360
-            	// continue
-            }
-		currAngle = 0; //update currAngle
-        moveStraight(Xdistance);
-        currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
-	}
-    else if (Xdistance<0){ // x2-x1 < 0 => rotate to angle 180 and move straight towards -ve X-axis
-
-        if(currAngle==0){
-            rotateFn(OUT_C, 180);
-        }
-        else if (currAngle==90){
-            rotateFn(OUT_C, 90);
-        }
-        else if(currAngle==180){
-            rotateFn(OUT_C, 0);
-        }
-        else if(currAngle==270){
-            rotateFn(OUT_B, 90);
-        }
-        else { // i.e. currAngle==360
-             rotateFn(OUT_C, 180);
-        }
-
-		currAngle = 180; //update currAngle
-        Xdistance = (-1)* Xdistance;
-        moveStraight(Xdistance);
-        currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
-    }
-    else{
-        // do nothing
-    }
-}
-
-// move along Y-axis
-void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
-    double Ydistance = goalLocation[1]-initialLocation[1]; // y2-y1
-    TermPrintf("Current angle: %d\n", currAngle);
-    TermPrintf("Ydistance: %f\n", Ydistance);
-
-	if (Ydistance>0){ //y2-y1 > 0 => rotate to angle 90 and move straight towards +ve Y-axis
-            if(currAngle==0){
-            	rotateFn(OUT_C, 90);
-            }
-            else if (currAngle==90){
-                // continue
-            }
-            else if(currAngle==180){
-                rotateFn(OUT_B, 90);
-            }
-            else if(currAngle==270){
-                rotateFn(OUT_B, 180);
-            }
-            else { // i.e. currAngle==360
-            	rotateFn(OUT_C, 90);
-            }
-		currAngle = 90; //update currAngle
-        moveStraight(Ydistance);
-        currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
-	}
-    else if (Ydistance<0){ //y2-y1 < 0 => rotate to angle 270 and move straight towards -ve Y-axis
-
-        if(currAngle==0){
-            rotateFn(OUT_B, 90);
-        }
-        else if (currAngle==90){
-            rotateFn(OUT_B, 180);
-        }
-        else if(currAngle==180){
-            rotateFn(OUT_C, 90);
-        }
-        else if(currAngle==270){
-            // continue
-        }
-        else { // i.e. currAngle==360
-             rotateFn(OUT_B, 90);
-        }
-
-		currAngle = 270; //update currAngle
-        Ydistance = (-1)* Ydistance;
-        moveStraight(Ydistance);
-        currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
-    }
-    else{
-        // do nothing
-    }
-}
-
-void moveX1Y1toX2Y2(double initialLocation[2],double goalLocation[2]){
-	moveAlongXaxis(initialLocation, goalLocation);
-	moveAlongYaxis(initialLocation, goalLocation);
-}
 
 float calculateDistance(double x1y1[2], double x2y2[2]){
 	double d;
@@ -195,7 +51,7 @@ int obstacleFound(int r){
     return b;
 }
 
-void pathPlanner_findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_OBSTACLES][2]){ //finds nearest obstacles in the order: start-->obstacle-->...-->obstacle-->goal
+void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_OBSTACLES][2]){ //finds nearest obstacles in the order: start-->obstacle-->...-->obstacle-->goal
                               // i.e finds obstacle nearest to goal, then next obstacle nearest to current obstacle...and
                               // lastly finds goal location if it is the nearest one
                               // it skips the obstacles already found while looking for another nearest one
@@ -237,7 +93,17 @@ void pathPlanner_findNearestObstacle(double startPosition[2], double obstaclesPo
         i++; // total obstacles found = i, last obstacle position = i-1
     }
 
-    TermPrintf("Nearest obstacle: (%f, %f)\n",nearestLocation[0],nearestLocation[1]);
+    printf("Nearest obstacle: (%f, %f)\n",nearestLocation[0],nearestLocation[1]);
+}
+
+void pathPlanner(){
+    int p;
+    double tempArray2[2];
+    for (p=0; p<num_obstacles; p++){
+        tempArray2[0] = obstacle[alreadyFoundObstacle[i-1]][0];
+        tempArray2[1] = obstacle[alreadyFoundObstacle[i-1]][1];
+        findNearestObstacle(tempArray2, obstacle);
+    }
 }
 
 void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTACLES][2],double goalPosition[2]){
@@ -255,47 +121,23 @@ void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTA
     for(j=0; j<i; j++){
         tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0];
         tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1];
-        moveX1Y1toX2Y2(startPosition,tempArr);
+        printf("\n%d: (%f, %f)\n",j+1,obstaclesPositions[alreadyFoundObstacle[j]][0],obstaclesPositions[alreadyFoundObstacle[j]][1]);
+        
+        // moveX1Y1toX2Y2(startPosition,tempArr);
+        printf("move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], tempArr[0], tempArr[1]);
         startPosition[0]=tempArr[0];
         startPosition[1]=tempArr[1];
     }
 
-    moveX1Y1toX2Y2(startPosition, goal);
+    // moveX1Y1toX2Y2(startPosition, goal);
+    printf("move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], goal[0], goal[1]);
 }
-
-// void destroyArray(float** arr)
-// {
-//     free(*arr);
-//     free(arr);
-// }
-
 
 int main(void)
 {
-	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
-	//      please update the API or use the "Hello World EV3 Project Old API" as template.
-
-	InitEV3();
-
-	//TODO Place here your variables
-//	double distance = 0.10; // distance to travel
-//	int angle = 90; // rotation in degrees
-
-	//TODO Place here your code
-//	moveStraight(distance);
-//	rotateFn(OUT_C, angle);
-
-
-	// Visiblity graph algorithm
-	// double X1Y1[2] = {0,0};
-	// double X2Y2[2] = {0.305*3,0.305*3};
-
-    // moveX1Y1toX2Y2(X1Y1, X2Y2);
-    pathPlanner_findNearestObstacle(start, obstacle);
+    pathPlanner();
+    printf("Path: \n");
     avoidObstacles(start,obstacle,goal);
 
-	Wait(500);
-	FreeEV3();
-//	TermPrintf("Press ENTER to exit");
 	return 0;
 }
