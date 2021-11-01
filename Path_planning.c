@@ -11,20 +11,40 @@
 #define M_PI 3.1415927
 #define MAX_OBSTACLES 25 /* maximum number of obstacles */
 
-int num_obstacles = 3; /* number of obstacles */
+// int num_obstacles = 3; /* number of obstacles */
+
+// double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
+// {{0.305*2, 0.305*2},{0.305*3, 0.305*3},{0.305*4, 0.305*4},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+
+// double start[2] = {0.305*1, 0.305*1}; /* start location */
+// double goal[2] = {0.305*5,0.305*4}; /* goal location */
+
+// int currAngle = 270;
+// double currLocation[2]={0.305, 1.219}; //TODO equalize to start
+
+//-------------------------------------------------------------------
+int num_obstacles = 13; /* number of obstacles */
 
 double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
-{{0.305*2, 0.305*2},{0.305*3, 0.305*3},{0.305*4, 0.305*4},{-1,-1},{-1,-1},
-{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
-{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
-{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
-{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+{{0.61, 2.743},{0.915, 2.743},{1.219, 2.743},{1.829, 1.219},
+{1.829, 1.524},{ 1.829, 1.829}, {1.829, 2.134},{2.743, 0.305},
+{2.743, 0.61},{2.743, 0.915},{2.743, 2.743},{3.048, 2.743},
+{3.353, 2.743},
+{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+{-1,-1},{-1,-1},{-1,-1}};
 
-double start[2] = {0.305*1, 0.305*1}; /* start location */
-double goal[2] = {0.305*5,0.305*4}; /* goal location */
+double start[2] = {0.305, 1.219}; /* start location */
+double goal[2] = {3.658, 1.829}; /* goal location */
 
 int currAngle = 270;
 double currLocation[2]={0.305, 1.219}; //TODO equalize to start
+//------------------------------------------------------------------------
+
+
 int alreadyFoundObstacle[MAX_OBSTACLES]; // only stores the rows of obstacle array (rows of obstacles that are found to 
                                         // be nearest to start positions during path planning)
 int i=0;
@@ -38,14 +58,11 @@ float calculateDistance(double x1y1[2], double x2y2[2]){
 }
 
 int obstacleFound(int r){
-    int b;
+    int b=0;
     int m;
     for(m=0; m<i; m++){
         if (r == alreadyFoundObstacle[m]){
             b=1;
-        }
-        else {
-            b=0;
         }
     }
     return b;
@@ -84,8 +101,10 @@ void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_
     // after the nearest obstacle is found, check if the goal is nearer than the nearest obstacle found
     distanceToGoal =  calculateDistance(startPosition, goal);
     if (distanceToGoal<=lastmin){
-        nearestLocation[0] = goal[0];
-        nearestLocation[1] = goal[1];
+        nearestLocation[0] = goal[0]; // even if goal is found as the nearest location here it isn't stored as nearest obstacle in alreadyfoundobstacle 
+        nearestLocation[1] = goal[1]; // just for info: *here while looping for (p<num_obstacles) in pathPlanner fn the final nearestLocation holds either the location of goal or 
+                                      // the recent obstacle found depending on which one was found to be the nearest 
+                                      // (hence, nearestLocation array prints the same location i.e goal/theLastOne again and again for every iteration as there is no any other nearest location and it keeps holding the last elements)
     }
 
     if((nearestLocation[0] != goal[0]) && (nearestLocation[1] != goal[1])){
@@ -93,16 +112,16 @@ void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_
         i++; // total obstacles found = i, last obstacle position = i-1
     }
 
-    printf("Nearest obstacle: (%f, %f)\n",nearestLocation[0],nearestLocation[1]);
+    // printf("Nearest obstacle: (%f, %f)\n",nearestLocation[0],nearestLocation[1]); // *comment above for it printing the same elements again and again at the end (for iteration in pathPlanner function)
 }
 
 void pathPlanner(){
     int p;
     double tempArray2[2];
     for (p=0; p<num_obstacles; p++){
-        tempArray2[0] = obstacle[alreadyFoundObstacle[i-1]][0];
-        tempArray2[1] = obstacle[alreadyFoundObstacle[i-1]][1];
-        findNearestObstacle(tempArray2, obstacle);
+        tempArray2[0] = obstacle[alreadyFoundObstacle[i-1]][0]; // x of new start position
+        tempArray2[1] = obstacle[alreadyFoundObstacle[i-1]][1]; // y of the new start position 
+        findNearestObstacle(tempArray2, obstacle); // search from remaining obstacles the nearest to the new start position i.e obstacle pointed by recent/last element of alreadyFoundObstacle array 
     }
 }
 
@@ -121,22 +140,29 @@ void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTA
     for(j=0; j<i; j++){
         tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0];
         tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1];
-        printf("\n%d: (%f, %f)\n",j+1,obstaclesPositions[alreadyFoundObstacle[j]][0],obstaclesPositions[alreadyFoundObstacle[j]][1]);
+        printf("\n%d: (%f, %f) - ",j+1,obstaclesPositions[alreadyFoundObstacle[j]][0],obstaclesPositions[alreadyFoundObstacle[j]][1]);
         
         // moveX1Y1toX2Y2(startPosition,tempArr);
-        printf("move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], tempArr[0], tempArr[1]);
+        printf("move from (%f, %f) to (%f, %f)", startPosition[0], startPosition[1], tempArr[0], tempArr[1]);
         startPosition[0]=tempArr[0];
         startPosition[1]=tempArr[1];
     }
 
     // moveX1Y1toX2Y2(startPosition, goal);
-    printf("move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], goal[0], goal[1]);
+    printf("\n   Move to goal         - move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], goal[0], goal[1]);
 }
 
 int main(void)
 {
     pathPlanner();
-    printf("Path: \n");
+
+    // printf("\n");
+    // int q;
+    // for (q=0; q<i; q++){
+    //     printf("already found obstacle %d: (%f, %f)\n", q+1, obstacle[alreadyFoundObstacle[q]][0], obstacle[alreadyFoundObstacle[q]][1]);
+    // }
+
+    printf("Path: ");
     avoidObstacles(start,obstacle,goal);
 
 	return 0;
