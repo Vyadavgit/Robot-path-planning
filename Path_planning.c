@@ -299,6 +299,37 @@ void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTA
 //--------------------------------------------------------------------------------------------------------
 
 
+//-------------------------free spaces program------------------------------------------------------------
+int isObstacle(double g, double h, double obst[MAX_OBSTACLES][2]){
+    int z=0;
+    int a;
+    for(a=0; a<num_obstacles; a++){
+        if (g = obst[a][0] && h = obst[a][1]){
+            z=1;
+        }
+    }
+    return z;
+}
+
+int freeNUM = 176-num_obstacles; // 16x11-num_obstacles are free space coordinates
+double freeSpaces[freeNUM][2]; 
+void freeSpacesFinder(double obstacleSpaces[MAX_OBSTACLES][2]){
+    int k=0;
+    int frameRow,frameCol;
+    // for(k=0; k<freeNUM; k++){
+        for(frameRow=0; frameRow<16; frameRow++){
+            for(frameCol=0; frameCol<11; frameCol++){
+                if(isObstacle(0.305*frameRow, 0.305*frameCol, obstacleSpaces)==0){
+                    freeSpaces[k][0]= 0.305*frameRow;
+                    freeSpaces[k][1]= 0.305*frameCol;
+                    k++;
+                }
+            }
+        }
+    // }
+}
+//--------------------------------------------------------------------------------------------------------
+
 int main(void)
 {
 	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
