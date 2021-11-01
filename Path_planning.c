@@ -5,192 +5,88 @@
  \brief		Simple Hello World! for the Ev3
 */
 
-#include <ev3.h>
+#include <stdio.h>
+#include <math.h>
 
 #define M_PI 3.1415927
 #define MAX_OBSTACLES 25 /* maximum number of obstacles */
 
- int num_obstacles = 8; /* number of obstacles */
+// int num_obstacles = 3; /* number of obstacles */
 
- double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
- {{0.305*2, 0.305*3},{0.305*3, 0.305*1},{0.305*4, 0.305*3},{0.305*1, 0.305*4},{0.305*1, 0.305*2},
- {0.305*3, 0.305*4},{0.305*2, 0.305*2},{0.305*2, 0.305*1},{-1,-1},{-1,-1},
- {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
- {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
- {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
+// double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
+// {{0.305*2, 0.305*2},{0.305*3, 0.305*3},{0.305*4, 0.305*4},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+// {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
 
- double start[2] = {0.305*2, 0.305*3}; /* start location */
- double goal[2] = {0.305*7,0.305*3}; /* goal location */
+// double start[2] = {0.305*1, 0.305*1}; /* start location */
+// double goal[2] = {0.305*5,0.305*4}; /* goal location */
 
- int currAngle = 270;
- double currLocation[2]={0.305, 1.219}; //TODO equalize to start
+// int currAngle = 270;
+// // double currLocation[2]={0.305, 1.219}; //TODO equalize to start
 
-//---------------------------------------------------------------------
-//int num_obstacles = 13; /* number of obstacles */
-//
-//double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
-//{{0.61, 2.743},{0.915, 2.743},{1.219, 2.743},{1.829, 1.219},
-//{1.829, 1.524},{ 1.829, 1.829}, {1.829, 2.134},{2.743, 0.305},
-//{2.743, 0.61},{2.743, 0.915},{2.743, 2.743},{3.048, 2.743},
-//{3.353, 2.743},
-//{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
-//{-1,-1},{-1,-1},{-1,-1}};
-//
-//double start[2] = {0.305, 1.219}; /* start location */
-//double goal[2] = {3.658, 1.829}; /* goal location */
-//
-//int currAngle = 270;
-//double currLocation[2]={0.305, 1.219}; //TODO equalize to start
-//-----------------------------------------------------------------------------------
+//-------------------------------------------------------------------
+int num_obstacles = 13; /* number of obstacles */
 
-void moveStraight(double distance){
-	// Notes: 360 motor rotations = 1 wheel rotation
-	// wheels r = 0.0275 m, c = 2*M_PI*r
-	double r = 0.0275; //radius of wheel in meters
-	double c; //circumference of wheel [meters]
-	double rotations_motor; // motor rotations needed to travel the distance
+double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
+{{0.61, 2.743},{0.915, 2.743},{1.219, 2.743},{1.829, 1.219},
+{1.829, 1.524},{ 1.829, 1.829}, {1.829, 2.134},{2.743, 0.305},
+{2.743, 0.61},{2.743, 0.915},{2.743, 2.743},{3.048, 2.743},
+{3.353, 2.743},
+{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
+{-1,-1},{-1,-1},{-1,-1}};
 
-	c = 2*M_PI*r; // circumference
-	rotations_motor = (360*distance)/c; // rotations needed ?
-										// 360 [motor rotations] = circumference(c) [distance traveled]
-										// that implies x [distance] = (360*x)/c [rotations] needed
+double start[2] = {0.305, 1.219}; /* start location */
+double goal[2] = {3.658, 1.829}; /* goal location */
 
-	ResetRotationCount(OUT_B);
-	ResetRotationCount(OUT_C);
-	while (MotorRotationCount(OUT_B)<(rotations_motor+1) && MotorRotationCount(OUT_C)<(rotations_motor+1)) {
-	OnFwdSync(OUT_BC, 25);
-	}
-	Off(OUT_BC);
-}
+int currAngle = 270;
+// double currLocation[2]={0.305, 1.219}; //TODO equalize to start
+//------------------------------------------------------------------------
 
-void rotateFn(int output, int angle){
-	RotateMotor(output, 13, ((400*angle)/90)); // OUT_B - move right, OUT_C - move left, Observation: 400 [<Angle>] = 90 degrees rotation
-											  // => (400*x)/90 = x degrees rotation
-}
-
-//double angleToRotate(double initial[2], double final[2]){
-//	double Rangle = atan((final[1]-initial[1])/(final[0]-initial[0]));
-//	TermPrintf("Rotation angle: %f\n", Rangle);
-//	Wait(5000);
-//	return Rangle;
-//}
-
-// move along X-axis
-void moveAlongXaxis(double initialLocation[2],double goalLocation[2]){
-    double Xdistance = goalLocation[0]-initialLocation[0]; // x2-x1
-    TermPrintf("Current angle: %d\n", currAngle);
-    TermPrintf("Xdistance: %f\n", Xdistance);
-
-	if (Xdistance>0){ //x2-x1 > 0  => rotate to angle 0 and move straight towards +ve X-axis
-            if(currAngle==0){
-            	// continue
-            }
-            else if (currAngle==90){
-                rotateFn(OUT_B, 90);
-            }
-            else if(currAngle==180){
-                rotateFn(OUT_B, 180);
-            }
-            else if(currAngle==270){
-                rotateFn(OUT_C, 90);
-            }
-            else { // i.e. currAngle==360
-            	// continue
-            }
-		currAngle = 0; //update currAngle
-        moveStraight(Xdistance);
-        currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
-	}
-    else if (Xdistance<0){ // x2-x1 < 0 => rotate to angle 180 and move straight towards -ve X-axis
-
-        if(currAngle==0){
-            rotateFn(OUT_C, 180);
+//-------------------------free spaces program------------------------------------------------------------
+// This program creates a new 2D array of free spaces to be passed to the path planner program segment
+int isObstacle(double g, double h, double obst[MAX_OBSTACLES][2]){
+    int z=0;
+    int a;
+    for(a=0; a<num_obstacles; a++){
+        if (g == obst[a][0] && h == obst[a][1]){
+            z=1;
         }
-        else if (currAngle==90){
-            rotateFn(OUT_C, 90);
-        }
-        else if(currAngle==180){
-            rotateFn(OUT_C, 0);
-        }
-        else if(currAngle==270){
-            rotateFn(OUT_B, 90);
-        }
-        else { // i.e. currAngle==360
-             rotateFn(OUT_C, 180);
-        }
-
-		currAngle = 180; //update currAngle
-        Xdistance = (-1)* Xdistance;
-        moveStraight(Xdistance);
-        currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
     }
-    else{
-        // do nothing
-    }
+    return z;
 }
 
-// move along Y-axis
-void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
-    double Ydistance = goalLocation[1]-initialLocation[1]; // y2-y1
-    TermPrintf("Current angle: %d\n", currAngle);
-    TermPrintf("Ydistance: %f\n", Ydistance);
-
-	if (Ydistance>0){ //y2-y1 > 0 => rotate to angle 90 and move straight towards +ve Y-axis
-            if(currAngle==0){
-            	rotateFn(OUT_C, 90);
+int freeNUM = 176; // 16x11 may be the maximum free space coordinates available if no obstacles available
+int freeSpaceCounter=0;
+double freeSpaces[176][2]; 
+void freeSpacesFinder(double obstacleSpaces[MAX_OBSTACLES][2]){
+    int frameRow,frameCol;
+    // for(k=0; k<freeNUM; k++){
+        for(frameRow=0; frameRow<16; frameRow++){
+            for(frameCol=0; frameCol<11; frameCol++){
+                if(isObstacle(0.305*frameRow, 0.305*frameCol, obstacleSpaces)==0){
+                    freeSpaces[freeSpaceCounter][0]= 0.305*frameRow;
+                    freeSpaces[freeSpaceCounter][1]= 0.305*frameCol;
+                    freeSpaceCounter++;
+                }
             }
-            else if (currAngle==90){
-                // continue
-            }
-            else if(currAngle==180){
-                rotateFn(OUT_B, 90);
-            }
-            else if(currAngle==270){
-                rotateFn(OUT_B, 180);
-            }
-            else { // i.e. currAngle==360
-            	rotateFn(OUT_C, 90);
-            }
-		currAngle = 90; //update currAngle
-        moveStraight(Ydistance);
-        currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
-	}
-    else if (Ydistance<0){ //y2-y1 < 0 => rotate to angle 270 and move straight towards -ve Y-axis
-
-        if(currAngle==0){
-            rotateFn(OUT_B, 90);
         }
-        else if (currAngle==90){
-            rotateFn(OUT_B, 180);
-        }
-        else if(currAngle==180){
-            rotateFn(OUT_C, 90);
-        }
-        else if(currAngle==270){
-            // continue
-        }
-        else { // i.e. currAngle==360
-             rotateFn(OUT_B, 90);
-        }
-
-		currAngle = 270; //update currAngle
-        Ydistance = (-1)* Ydistance;
-        moveStraight(Ydistance);
-        currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
-    }
-    else{
-        // do nothing
-    }
+    // }
 }
 
-void moveX1Y1toX2Y2(double initialLocation[2],double goalLocation[2]){
-	moveAlongXaxis(initialLocation, goalLocation);
-	moveAlongYaxis(initialLocation, goalLocation);
-}
+// void printFreeSpaces(double freeCoordinates[176][2]){
+//     int f;
+//     printf("\nFree coordinates: \n");
+//     for(f=0; f<freeSpaceCounter; f++){
+//         printf("%d: (%f, %f)\n", f, freeCoordinates[f][0]/0.305, freeCoordinates[f][1]/0.305);
+//     }
+// }
+//--------------------------------------------------------------------------------------------------------
 
-//-------------------------------------path planner program-----------------------------------------------
-int alreadyFoundObstacle[MAX_OBSTACLES]; // only stores the rows of obstacle array (rows of obstacles that are found to
-                                        // be nearest to start positions during path planning)
+int alreadyFoundFreeSpace[176]; // 16*10 tiles => 16*11=176 intesections 
+                                // only stores the rows of free space array (rows of free spaces that are found to 
+                                // be nearest to start positions during path planning)
 int i=0;
 
 double sqrt(double arg);
@@ -201,21 +97,21 @@ float calculateDistance(double x1y1[2], double x2y2[2]){
     return d;
 }
 
-int obstacleFound(int r){
+int freeSpaceFound(int r){
     int b=0;
     int m;
     for(m=0; m<i; m++){
-        if (r == alreadyFoundObstacle[m]){
+        if (r == alreadyFoundFreeSpace[m]){
             b=1;
         }
     }
     return b;
 }
 
-void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_OBSTACLES][2]){ //finds nearest obstacles in the order: start-->obstacle-->...-->obstacle-->goal
-                              // i.e finds obstacle nearest to goal, then next obstacle nearest to current obstacle...and
+void findNearestFreeSpace(double startPosition[2], double freeSpacesPositions[176][2]){ //finds nearest freespace in the order: start-->freespace-->...-->freespace-->goal
+                              // i.e finds freespace nearest to goal, then next freespace nearest to current free space...and
                               // lastly finds goal location if it is the nearest one
-                              // it skips the obstacles already found while looking for another nearest one
+                              // it skips the freespaces already found while looking for another nearest one
     double temp[2];
     double nearestLocation[2];
     int closestCounter;
@@ -225,12 +121,12 @@ void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_
     double distanceToGoal;
 
     int row;
-    for (row=0; row<num_obstacles; row++){  // iterate through all obstacles to find the nearest obstacle
-                                                // to the start position(the nearest obstacle found is the start position for next iterations through remaining obstacles)
+    for (row=0; row<freeSpaceCounter; row++){  // iterate through all freespaces to find the nearest freespace
+                                                // to the start position(the nearest freespace found is the start position for next iterations through remaining freespaces)
 
-        if (obstacleFound(row)==0){ // look for the closest obstacles only from the set of obstacles that haven't been found as closest before
-            temp[0] = obstaclesPositions[row][0];
-            temp[1] = obstaclesPositions[row][1];
+        if (freeSpaceFound(row)==0){ // look for the closest freespace only from the set of freespaces that haven't been found as closest before
+            temp[0] = freeSpacesPositions[row][0];
+            temp[1] = freeSpacesPositions[row][1];
 
             min = calculateDistance(startPosition,temp);
             if (min<=lastmin){
@@ -239,131 +135,81 @@ void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_
             }
         }
     }
-    nearestLocation[0] = obstaclesPositions[closestCounter][0];
-    nearestLocation[1] = obstaclesPositions[closestCounter][1];
+    nearestLocation[0] = freeSpacesPositions[closestCounter][0];
+    nearestLocation[1] = freeSpacesPositions[closestCounter][1];
 
-    // after the nearest obstacle is found, check if the goal is nearer than the nearest obstacle found
+    // after the nearest freespace is found, check if the goal is nearer than the nearest freespace found
     distanceToGoal =  calculateDistance(startPosition, goal);
     if (distanceToGoal<=lastmin){
-        nearestLocation[0] = goal[0]; // even if goal is found as the nearest location here it isn't stored as nearest obstacle in alreadyfoundobstacle
-        nearestLocation[1] = goal[1]; // just for info: *here while looping for (p<num_obstacles) in pathPlanner fn the final nearestLocation holds either the location of goal or
-                                      // the recent obstacle found depending on which one was found to be the nearest
+        nearestLocation[0] = goal[0]; // even if goal is found as the nearest location here it isn't stored as nearest freespace in alreadyFoundFreeSpace 
+        nearestLocation[1] = goal[1]; // just for info: *here while looping for (p<freeSpaceCounter) in pathPlanner fn the final nearestLocation holds either the location of goal or 
+                                      // the recent free space found depending on which one was found to be the nearest 
                                       // (hence, nearestLocation array prints the same location i.e goal/theLastOne again and again for every iteration as there is no any other nearest location and it keeps holding the last elements)
     }
 
     if((nearestLocation[0] != goal[0]) && (nearestLocation[1] != goal[1])){
-        alreadyFoundObstacle[i]=closestCounter; // storing rows of the obstacles already found i.e plan the path
-        i++; // total obstacles found = i, last obstacle position = i-1
+        alreadyFoundFreeSpace[i]=closestCounter; // storing rows of the free spaces already found i.e plan the path
+        i++; // total free spaces found = i, last free space position = i-1
     }
 
-    // printf("Nearest obstacle: (%f, %f)\n",nearestLocation[0],nearestLocation[1]); // *comment above for it printing the same elements again and again at the end (for iteration in pathPlanner function)
+    // printf("Nearest free space: (%f, %f)\n",nearestLocation[0],nearestLocation[1]); // *comment above for it printing the same elements again and again at the end (for iteration in pathPlanner function)
 }
 
 void pathPlanner(){
     int p;
     double tempArray2[2];
-    for (p=0; p<num_obstacles; p++){
-        tempArray2[0] = obstacle[alreadyFoundObstacle[i-1]][0]; // x of new start position
-        tempArray2[1] = obstacle[alreadyFoundObstacle[i-1]][1]; // y of the new start position
-        findNearestObstacle(tempArray2, obstacle); // search from remaining obstacles the nearest to the new start position i.e obstacle pointed by recent/last element of alreadyFoundObstacle array
+    for (p=0; p<freeSpaceCounter; p++){
+        tempArray2[0] = freeSpaces[alreadyFoundFreeSpace[i-1]][0]; // x of new start position
+        tempArray2[1] = freeSpaces[alreadyFoundFreeSpace[i-1]][1]; // y of the new start position 
+        findNearestFreeSpace(tempArray2, freeSpaces); // search from remaining free spaces the nearest to the new start position i.e freespace pointed by recent/last element of alreadyFoundFreeSpace array 
     }
 }
 
-void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTACLES][2],double goalPosition[2]){
-	// 1. find the nearest obstacle from start
-    // 2. move to that obstacle(with safety margin 0.61)
-    // 1.. repeat i.e. find the next obstacle closest to the new start position
-    // 2.. repeat i.e. move to that obstacle(with safety margin 0.61)
-    // 1,2.. repeat until you reach the last obstacle that is closest to the new start position (means there are no other obstacles that is
-    // closer to the current obstacle than the goal itself)
+void avoidObstacles(double startPosition[2], double freeSpacesPositions[176][2],double goalPosition[2]){
+	// 1. find the nearest freespace from start
+    // 2. move to that freespace(with safety margin 0.61)
+    // 1.. repeat i.e. find the next freespace closest to the new start position
+    // 2.. repeat i.e. move to that freespace(with safety margin 0.61)
+    // 1,2.. repeat until you reach the last freespace that is closest to the new start position (means there are no other freespaces that is
+    // closer to the current freespace than the goal itself)
     // 3. lastly move to the goal
 
     // 1.
     double tempArr[2];
     int j;
     for(j=0; j<i; j++){
-        tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0];
-        tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1];
-//        printf("\n%d: (%f, %f) - ",j+1,obstaclesPositions[alreadyFoundObstacle[j]][0],obstaclesPositions[alreadyFoundObstacle[j]][1]);
-
-         moveX1Y1toX2Y2(startPosition,tempArr);
-//        printf("move from (%f, %f) to (%f, %f)", startPosition[0], startPosition[1], tempArr[0], tempArr[1]);
+        tempArr[0] =  freeSpacesPositions[alreadyFoundFreeSpace[j]][0];
+        tempArr[1] =  freeSpacesPositions[alreadyFoundFreeSpace[j]][1];
+        printf("\n%d: (%f, %f) - ",j+1,freeSpacesPositions[alreadyFoundFreeSpace[j]][0],freeSpacesPositions[alreadyFoundFreeSpace[j]][1]);
+        
+        // moveX1Y1toX2Y2(startPosition,tempArr);
+        printf("move from (%f, %f) to (%f, %f)", startPosition[0]/0.305, startPosition[1]/0.305, tempArr[0]/0.305, tempArr[1]/0.305);
         startPosition[0]=tempArr[0];
         startPosition[1]=tempArr[1];
     }
 
-     moveX1Y1toX2Y2(startPosition, goal);
-//    printf("\n   Move to goal         - move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], goal[0], goal[1]);
+    // moveX1Y1toX2Y2(startPosition, goal);
+    printf("\n   Move to goal         - move from (%f, %f) to (%f, %f)\n", startPosition[0]/0.305, startPosition[1]/0.305, goal[0]/0.305, goal[1]/0.305);
 }
-
-//--------------------------------------------------------------------------------------------------------
-
-
-//-------------------------free spaces program------------------------------------------------------------
-int isObstacle(double g, double h, double obst[MAX_OBSTACLES][2]){
-    int z=0;
-    int a;
-    for(a=0; a<num_obstacles; a++){
-        if (g = obst[a][0] && h = obst[a][1]){
-            z=1;
-        }
-    }
-    return z;
-}
-
-int freeNUM = 176-num_obstacles; // 16x11-num_obstacles are free space coordinates
-double freeSpaces[freeNUM][2]; 
-void freeSpacesFinder(double obstacleSpaces[MAX_OBSTACLES][2]){
-    int k=0;
-    int frameRow,frameCol;
-    // for(k=0; k<freeNUM; k++){
-        for(frameRow=0; frameRow<16; frameRow++){
-            for(frameCol=0; frameCol<11; frameCol++){
-                if(isObstacle(0.305*frameRow, 0.305*frameCol, obstacleSpaces)==0){
-                    freeSpaces[k][0]= 0.305*frameRow;
-                    freeSpaces[k][1]= 0.305*frameCol;
-                    k++;
-                }
-            }
-        }
-    // }
-}
-//--------------------------------------------------------------------------------------------------------
 
 int main(void)
 {
-	// INFO This code template works only with recent versions of the API. If TermPrintln is not found,
-	//      please update the API or use the "Hello World EV3 Project Old API" as template.
 
-	InitEV3();
+    freeSpacesFinder(obstacle);
+    // printFreeSpaces(freeSpaces);
 
-	//TODO Place here your variables
-//	double distance = 0.10; // distance to travel
-//	int angle = 90; // rotation in degrees
+    pathPlanner();
 
-	//TODO Place here your code
-//	moveStraight(distance);
-//	rotateFn(OUT_C, angle);
+    // printf("\n");
+    // int q;
+    // for (q=0; q<i; q++){
+    //     printf("already found freespace %d: (%f, %f)\n", q+1, freeSpaces[alreadyFoundFreeSpace[q]][0], freeSpaces[alreadyFoundFreeSpace[q]][1]);
+    // }
 
+    printf("\nPath: ");
+    avoidObstacles(start,freeSpaces,goal);
 
-	// Visiblity graph algorithm
-//	double X1Y1[2] = {0,0};
-//	double X2Y2[2] = {0.305*3,0.305*3};
-//
-//    moveX1Y1toX2Y2(X1Y1, X2Y2);
+    
 
-	pathPlanner();
-	    // printf("\n");
-	    // int q;
-	    // for (q=0; q<i; q++){
-	    //     printf("already found obstacle %d: (%f, %f)\n", q+1, obstacle[alreadyFoundObstacle[q]][0], obstacle[alreadyFoundObstacle[q]][1]);
-	    // }
-
-//	 printf("Path: ");
-	avoidObstacles(start,obstacle,goal);
-
-	Wait(500);
-	FreeEV3();
-//	TermPrintf("Press ENTER to exit");
 	return 0;
 }
