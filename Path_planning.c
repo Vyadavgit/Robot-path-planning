@@ -10,11 +10,11 @@
 #define M_PI 3.1415927
 #define MAX_OBSTACLES 25 /* maximum number of obstacles */
 
- int num_obstacles = 8; /* number of obstacles */
+int num_obstacles = 8; /* number of obstacles */
 
  double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
- {{0.305*2, 0.305*3},{0.305*3, 0.305*1},{0.305*4, 0.305*3},{0.305*1, 0.305*4},{0.305*1, 0.305*2},
- {0.305*3, 0.305*4},{0.305*2, 0.305*2},{0.305*2, 0.305*1},{-1,-1},{-1,-1},
+ {{0.305*2, 0.305*3},{0.305*3, 0.305*1},{0.305*4, 0.305*3},{0.305*1, 0.305*4},{0.305*1, 0.305*3},
+ {0.305*3, 0.305*4},{0.305*6, 0.305*3},{0.305*6, 0.305*4},{-1,-1},{-1,-1},
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
@@ -225,10 +225,16 @@ void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
     }
 }
 
-void moveX1Y1toX2Y2(double initialLocation[2],double goalLocation[2]){
+void Xfirst_moveX1Y1toX2Y2(double initialLocation[2],double goalLocation[2]){
 	moveAlongXaxis(initialLocation, goalLocation);
 	moveAlongYaxis(initialLocation, goalLocation);
 }
+
+void Yfirst_moveX1Y1toX2Y2(double initialLocation[2],double goalLocation[2]){
+	moveAlongYaxis(initialLocation, goalLocation);
+    moveAlongXaxis(initialLocation, goalLocation);
+}
+
 
 //-------------------------------------path planner program-----------------------------------------------
 int alreadyFoundObstacle[MAX_OBSTACLES]; // only stores the rows of obstacle array (rows of obstacles that are found to
@@ -302,14 +308,94 @@ void findNearestObstacle(double startPosition[2], double obstaclesPositions[MAX_
 }
 
 void pathPlanner(){
+	findNearestObstacle(start,obstacle);
     int p;
     double tempArray2[2];
-    for (p=0; p<num_obstacles; p++){
+    for (p=1; p<num_obstacles; p++){
         tempArray2[0] = obstacle[alreadyFoundObstacle[i-1]][0]; // x of new start position
         tempArray2[1] = obstacle[alreadyFoundObstacle[i-1]][1]; // y of the new start position
         findNearestObstacle(tempArray2, obstacle); // search from remaining obstacles the nearest to the new start position i.e obstacle pointed by recent/last element of alreadyFoundObstacle array
     }
 }
+
+//------------------------change dirn to avoid obstacles-------------------------separate segment---------------
+//check if it is obstacle
+int isObstacle(double checkArr[2]){
+    int is=0;
+    int num;
+    for(num=0;num<i;num++){
+        if((checkArr[0]==obstacle[alreadyFoundObstacle[num]][0]) && (checkArr[1]==obstacle[alreadyFoundObstacle[num]][1])){
+            is=1;
+        }
+    }
+    return is;
+}
+
+void changeDirn(double startarg[2], double goalarg[2]){
+    // printf("Default move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
+
+    double Xcheck[2];
+    Xcheck[0] = startarg[0]+0.305;
+    Xcheck[1] = startarg[1];
+    // printf("Xcheck (%f, %f)\n", Xcheck[0], Xcheck[1]);
+
+    double XcheckNegDir[2];
+    XcheckNegDir[0] = startarg[0]-0.305;
+    XcheckNegDir[1] = startarg[1];
+    // printf("XcheckNegDir (%f, %f)\n", XcheckNegDir[0], XcheckNegDir[1]);
+
+
+    double Ycheck[2];
+    Ycheck[0] = startarg[0];
+    Ycheck[1] = startarg[1]+0.305;
+    // printf("Ycheck (%f, %f)\n", Ycheck[0], Ycheck[1]);
+
+    double YcheckNegDir[2];
+    YcheckNegDir[0] = startarg[0];
+    YcheckNegDir[1] = startarg[1]-0.305;
+    // printf("YcheckNegDir (%f, %f)\n", YcheckNegDir[0], YcheckNegDir[1]);
+
+    double XXdistance;
+    double YYdistance;
+    XXdistance = startarg[0]-goalarg[0];
+    YYdistance = startarg[1]-goalarg[1];
+
+
+    if(XXdistance>0 && isObstacle(Xcheck)==1){
+        // printf("\nXXdistance: %f\n",XXdistance);
+        // printf("isObstacle: %d\n", isObstacle(Xcheck));
+
+        Yfirst_moveX1Y1toX2Y2(startarg,goalarg);
+        // printf("move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
+
+    }
+    else if(XXdistance<0 && isObstacle(XcheckNegDir)==1){
+        // printf("\nXXdistance: %f\n",XXdistance);
+        // printf("isObstacle: %d\n", isObstacle(XcheckNegDir));
+
+        Yfirst_moveX1Y1toX2Y2(startarg,goalarg);
+        // printf("move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
+    }
+    else if(YYdistance>0 && isObstacle(Ycheck)==1){
+        // printf("\nYYdistance: %f\n",YYdistance);
+        // printf("isObstacle: %d\n", isObstacle(Ycheck));
+
+        Xfirst_moveX1Y1toX2Y2(startarg,goalarg);
+        // printf("move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
+    }
+    else if(YYdistance<0 && isObstacle(YcheckNegDir)==1){
+        // printf("\nYYdistance: %f\n",YYdistance);
+        // printf("isObstacle: %d\n", isObstacle(YcheckNegDir));
+
+        Xfirst_moveX1Y1toX2Y2(startarg,goalarg);
+        // printf("move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
+    }
+    else{
+        Xfirst_moveX1Y1toX2Y2(startarg, goalarg);
+        // printf("move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
+    }
+}
+//-------------------------------------------------------------------------------
 
 void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTACLES][2],double goalPosition[2]){
 	// 1. find the nearest obstacle from start
@@ -324,17 +410,19 @@ void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTA
     double tempArr[2];
     int j;
     for(j=0; j<i; j++){
-        tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0];
-        tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1];
+        tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0]-0.305; //avoid obstacle by .305 offset
+        tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1]-0.305; //avoid obstacle by .305 offset
 //        printf("\n%d: (%f, %f) - ",j+1,obstaclesPositions[alreadyFoundObstacle[j]][0],obstaclesPositions[alreadyFoundObstacle[j]][1]);
 
-         moveX1Y1toX2Y2(startPosition,tempArr);
+         changeDirn(startPosition,tempArr);
+         // Xfirst_moveX1Y1toX2Y2(startPosition,tempArr);
 //        printf("move from (%f, %f) to (%f, %f)", startPosition[0], startPosition[1], tempArr[0], tempArr[1]);
         startPosition[0]=tempArr[0];
         startPosition[1]=tempArr[1];
     }
 
-     moveX1Y1toX2Y2(startPosition, goal);
+        changeDirn(startPosition, goal);
+        //  Xfirst_moveX1Y1toX2Y2(startPosition, goal);
 //    printf("\n   Move to goal         - move from (%f, %f) to (%f, %f)\n", startPosition[0], startPosition[1], goal[0], goal[1]);
 }
 
