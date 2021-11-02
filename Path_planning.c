@@ -19,11 +19,13 @@
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
 
- double start[2] = {0.305*2, 0.305*3}; /* start location */
- double goal[2] = {0.305*7,0.305*3}; /* goal location */
+ double start[2] = {0.305*1, 0.305*1}; /* start location */
+ double goal[2] = {0.305*4,0.305*4}; /* goal location */
 
  int currAngle = 270;
- double currLocation[2]={0.305, 1.219}; //TODO equalize to start
+ double currLocation[2]={0.305*1, 0.305*1}; //TODO equalize to start
+ int OffsetY=0;
+ int offsetX=0;
 
 //---------------------------------------------------------------------
 //int num_obstacles = 13; /* number of obstacles */
@@ -87,41 +89,61 @@ void moveAlongXaxis(double initialLocation[2],double goalLocation[2]){
             }
             else if (currAngle==90){
                 rotateFn(OUT_B, 90);
+                OffsetY = 1; // increases offset in Y
             }
             else if(currAngle==180){
                 rotateFn(OUT_B, 180);
+                OffsetY = 1; // increases offset in Y
             }
             else if(currAngle==270){
                 rotateFn(OUT_C, 90);
+                OffsetY = -1; // decreses offset in Y
             }
             else { // i.e. currAngle==360
             	// continue
             }
 		currAngle = 0; //update currAngle
-        moveStraight(Xdistance);
+
+        // moveStraight(Xdistance);
+        moveStraight(Xdistance-0.145*offsetX); // distance between the two wheels = 14.5 cm
+                                               // increase Xdistance if offset is -1
+                                               // decrease Xdistance if offset is 1
+        offsetX = 0; // reset offsetX after adjusted movement in X axis
+
         currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
 	}
     else if (Xdistance<0){ // x2-x1 < 0 => rotate to angle 180 and move straight towards -ve X-axis
 
         if(currAngle==0){
             rotateFn(OUT_C, 180);
+            OffsetY = 1; // increses offset in Y
         }
         else if (currAngle==90){
             rotateFn(OUT_C, 90);
+            OffsetY = 1; // increses offset in Y
         }
         else if(currAngle==180){
             rotateFn(OUT_C, 0);
+            OffsetY = 1; // increses offset in Y
         }
         else if(currAngle==270){
             rotateFn(OUT_B, 90);
+            OffsetY = -1; // decreases offset in Y
         }
         else { // i.e. currAngle==360
              rotateFn(OUT_C, 180);
+             OffsetY = 1;// increses offset in Y
         }
 
 		currAngle = 180; //update currAngle
         Xdistance = (-1)* Xdistance;
-        moveStraight(Xdistance);
+
+        // moveStraight(Xdistance);
+        moveStraight(Xdistance-0.145*offsetX); // distance between the two wheels = 14.5 cm
+                                               // increase Xdistance if offset is -1
+                                               // decrease Xdistance if offset is 1
+        offsetX = 0; // reset offsetX after adjusted movement in X axis
+
         currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
     }
     else{
@@ -138,44 +160,64 @@ void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
 	if (Ydistance>0){ //y2-y1 > 0 => rotate to angle 90 and move straight towards +ve Y-axis
             if(currAngle==0){
             	rotateFn(OUT_C, 90);
+                offsetX = 1;// increases offset in X
             }
             else if (currAngle==90){
                 // continue
             }
             else if(currAngle==180){
                 rotateFn(OUT_B, 90);
+                offsetX = -1;// decreases offset in X
             }
             else if(currAngle==270){
                 rotateFn(OUT_B, 180);
+                offsetX = -1;// decreases offset in X
             }
             else { // i.e. currAngle==360
             	rotateFn(OUT_C, 90);
+                offsetX = 1;// increases offset in X
             }
 		currAngle = 90; //update currAngle
-        moveStraight(Ydistance);
+
+        // moveStraight(Ydistance);
+        moveStraight(Ydistance-0.145*OffsetY); // distance between the two wheels = 14.5 cm
+                                               // increase Ydistance if offset is -1
+                                               // decrease Ydistance if offset is 1
+        OffsetY = 0; // reset offsetY after adjusted movement in Y axis
+
         currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
 	}
     else if (Ydistance<0){ //y2-y1 < 0 => rotate to angle 270 and move straight towards -ve Y-axis
 
         if(currAngle==0){
             rotateFn(OUT_B, 90);
+            offsetX = 1;// increases offset in X
         }
         else if (currAngle==90){
             rotateFn(OUT_B, 180);
+            offsetX = 1;// increases offset in X
         }
         else if(currAngle==180){
             rotateFn(OUT_C, 90);
+            offsetX = -1;// decreases offset in X
         }
         else if(currAngle==270){
             // continue
         }
         else { // i.e. currAngle==360
              rotateFn(OUT_B, 90);
+             offsetX = 1;// increases offset in X
         }
 
 		currAngle = 270; //update currAngle
         Ydistance = (-1)* Ydistance;
-        moveStraight(Ydistance);
+
+        // moveStraight(Ydistance);
+        moveStraight(Ydistance-0.145*OffsetY); // distance between the two wheels = 14.5 cm
+                                               // increase Ydistance if offset is -1
+                                               // decrease Ydistance if offset is 1
+        OffsetY = 0; // reset offsetY after adjusted movement in Y axis
+
         currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
     }
     else{
