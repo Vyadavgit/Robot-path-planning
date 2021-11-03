@@ -10,12 +10,12 @@
 #define M_PI 3.1415927
 #define MAX_OBSTACLES 25 /* maximum number of obstacles */
 
-int num_obstacles = 13; /* number of obstacles */
+int num_obstacles = 10; /* number of obstacles */
 
 double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
- {{0.305*2, 0.305*2},{0.305*4,0.305*2},{0.305*4,0.305*3},{0.305*4,0.305*4},{0.305*4,0.305*5},
- {0.305*5,0.305*3},{0.305*6,0.305*3},{0.305*6,0.305*4},{0.305*6,0.305*5},{0.305*3,0.305*6},
- {0.305*2,0.305*6},{0.305*1,0.305*6},{0.305*3,0.305*2},{-1,-1},{-1,-1},
+ {{0.305*2, 0.305*2},{0.305*4,0.305*2},{0.305*4,0.305*3},{0.305*4,0.305*5},
+ {0.305*6,0.305*3},{0.305*6,0.305*4},{0.305*6,0.305*5},{0.305*3,0.305*6},
+ {0.305*2,0.305*6},{0.305*1,0.305*6},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},
  {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
 
@@ -25,6 +25,8 @@ double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
 
  int currAngle = 270;
  double currLocation[2]={0.305*1, 0.305*1}; //TODO equalize to start
+ int OffsetY=0;
+ int offsetX=0;
 
 //---------------------------------------------------------------------
 //int num_obstacles = 13; /* number of obstacles */
@@ -43,9 +45,6 @@ double obstacle[MAX_OBSTACLES][2] = /* obstacle locations */
 //int currAngle = 270;
 //double currLocation[2]={0.305, 1.219}; //TODO equalize to start
 //-----------------------------------------------------------------------------------
-
- int OffsetY=0;
- int offsetX=0;
 
 void moveStraight(double distance){
 	// Notes: 360 motor rotations = 1 wheel rotation
@@ -106,38 +105,10 @@ void moveAlongXaxis(double initialLocation[2],double goalLocation[2]){
             }
 		currAngle = 0; //update currAngle
 
-//------------------------------------------------------------------recursion
-        double newgoal[2];
-        int times = (Xdistance/0.305);
-        if (times>1){
-            int vnum;
-            for (vnum=1; vnum<times; vnum++){
-                // goalLocation[0]=currLocation[0]+vnum*0.305);
-
-                if(vnum==1){
-                     moveStraight(0.305-0.145*offsetX);
-                     currLocation[0] = currLocation[0]+(0.305-0.145*offsetX);
-                     newgoal[0]=currLocation[0];
-                     newgoal[1]=currLocation[1];
-                     changeDirn(currLocation,newgoal);
-                }
-                else{
-                    moveStraight(0.305);
-                    currLocation[0] = currLocation[0]+0.305;
-                    newgoal[0]=currLocation[0];
-                    newgoal[1]=currLocation[1];
-                    changeDirn(currLocation,newgoal);
-                }
-            }
-        }
-//------------------------------------------------------------------------------------
-
-
-        // // moveStraight(Xdistance);
-        // moveStraight(Xdistance-0.145*offsetX); // distance between the two wheels = 14.5 cm
-        //                                        // increase Xdistance if offset is -1
-        //                                        // decrease Xdistance if offset is 1
-
+        // moveStraight(Xdistance);
+        moveStraight(Xdistance-0.145*offsetX); // distance between the two wheels = 14.5 cm
+                                               // increase Xdistance if offset is -1
+                                               // decrease Xdistance if offset is 1
         offsetX = 0; // reset offsetX after adjusted movement in X axis
 
         currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
@@ -168,42 +139,13 @@ void moveAlongXaxis(double initialLocation[2],double goalLocation[2]){
 		currAngle = 180; //update currAngle
         Xdistance = (-1)* Xdistance;
 
-//------------------------------------------------------------------recursion
-        double newgoall[2];
-        int timess = (Xdistance/0.305);
-        if (timess>1){
-            int vnumm;
-            for (vnumm=1; vnumm<timess; vnumm++){
-                // goalLocation[0]=currLocation[0]+vnum*0.305);
-
-                if(vnumm==1){
-                     moveStraight(0.305-0.145*offsetX);
-                     currLocation[0] = currLocation[0]-(0.305-0.145*offsetX);
-                     newgoall[0]=currLocation[0];
-                     newgoall[1]=currLocation[1];
-                     changeDirn(currLocation,newgoall);
-                }
-                else{
-                    moveStraight(0.305);
-                    currLocation[0] = currLocation[0]-0.305;
-                    newgoall[0]=currLocation[0];
-                    newgoall[1]=currLocation[1];
-                    changeDirn(currLocation,newgoall);
-                }
-                
-                changeDirn(currLocation,goalLocation);
-            }
-        }
-//----------------------------------------------------------------------
-
-        // // moveStraight(Xdistance);
-        // moveStraight(Xdistance-0.145*offsetX); // distance between the two wheels = 14.5 cm
-        //                                        // increase Xdistance if offset is -1
-        //                                        // decrease Xdistance if offset is 1
-        
+        // moveStraight(Xdistance);
+        moveStraight(Xdistance-0.145*offsetX); // distance between the two wheels = 14.5 cm
+                                               // increase Xdistance if offset is -1
+                                               // decrease Xdistance if offset is 1
         offsetX = 0; // reset offsetX after adjusted movement in X axis
 
-        currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] - Xdistance;
+        currLocation[0]  = goalLocation[0]; // OR i.e. currLocation[0] = currLocation[0] + Xdistance;
     }
     else{
         // do nothing
@@ -238,38 +180,10 @@ void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
             }
 		currAngle = 90; //update currAngle
 
-//------------------------------------------------------------------recursion
-        double newgoal[2];
-        int times = (Ydistance/0.305);
-        if (times>1){
-            int vnum;
-            for (vnum=1; vnum<times; vnum++){
-                // goalLocation[0]=currLocation[0]+vnum*0.305);
-
-                if(vnum==1){
-                     moveStraight(0.305-0.145*offsetX);
-                     currLocation[1] = currLocation[1]+(0.305-0.145*offsetX);
-                     newgoal[0]=currLocation[0];
-                     newgoal[1]=currLocation[1];
-                     changeDirn(currLocation,newgoal);
-                }
-                else{
-                    moveStraight(0.305);
-                    currLocation[1] = currLocation[1]+0.305;
-                    newgoal[0]=currLocation[0];
-                    newgoal[1]=currLocation[1];
-                    changeDirn(currLocation,newgoal);
-                }
-                
-                changeDirn(currLocation,goalLocation);
-            }
-        }
-//------------------------------------------------------------------------------------
-
-        // // moveStraight(Ydistance);
-        // moveStraight(Ydistance-0.145*OffsetY); // distance between the two wheels = 14.5 cm
-        //                                        // increase Ydistance if offset is -1
-        //                                        // decrease Ydistance if offset is 1
+        // moveStraight(Ydistance);
+        moveStraight(Ydistance-0.145*OffsetY); // distance between the two wheels = 14.5 cm
+                                               // increase Ydistance if offset is -1
+                                               // decrease Ydistance if offset is 1
         OffsetY = 0; // reset offsetY after adjusted movement in Y axis
 
         currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
@@ -299,38 +213,10 @@ void moveAlongYaxis(double initialLocation[2],double goalLocation[2]){
 		currAngle = 270; //update currAngle
         Ydistance = (-1)* Ydistance;
 
-//------------------------------------------------------------------recursion
-        double newgoall[2];
-        int timess = (Ydistance/0.305);
-        if (timess>1){
-            int vnumm;
-            for (vnumm=1; vnumm<timess; vnumm++){
-                // goalLocation[0]=currLocation[0]+vnum*0.305);
-
-                if(vnumm==1){
-                     moveStraight(0.305-0.145*offsetX);
-                     currLocation[1] = currLocation[0]-(0.305-0.145*offsetX);
-                     newgoall[0]=currLocation[0];
-                     newgoall[1]=currLocation[1];
-                     changeDirn(currLocation,newgoall);
-                }
-                else{
-                    moveStraight(0.305);
-                    currLocation[1] = currLocation[0]-0.305;
-                    newgoall[0]=currLocation[0];
-                    newgoall[1]=currLocation[1];
-                    changeDirn(currLocation,newgoall);
-                }
-                
-                changeDirn(currLocation,goalLocation);
-            }
-        }
-//----------------------------------------------------------------------
-
-        // // moveStraight(Ydistance);
-        // moveStraight(Ydistance-0.145*OffsetY); // distance between the two wheels = 14.5 cm
-        //                                        // increase Ydistance if offset is -1
-        //                                        // decrease Ydistance if offset is 1
+        // moveStraight(Ydistance);
+        moveStraight(Ydistance-0.145*OffsetY); // distance between the two wheels = 14.5 cm
+                                               // increase Ydistance if offset is -1
+                                               // decrease Ydistance if offset is 1
         OffsetY = 0; // reset offsetY after adjusted movement in Y axis
 
         currLocation[1]  = goalLocation[1]; // OR i.e. currLocation[1] = currLocation[1] + Ydistance;
@@ -450,24 +336,24 @@ void changeDirn(double startarg[2], double goalarg[2]){
     // printf("Default move from (%f, %f) to (%f, %f)", startarg[0], startarg[1], goalarg[0], goalarg[1]);
 
     double Xcheck[2];
-    Xcheck[0] = startarg[0]+0.305;
+    Xcheck[0] = startarg[0]+((0.305/2)+0.1);
     Xcheck[1] = startarg[1];
     // printf("Xcheck (%f, %f)\n", Xcheck[0], Xcheck[1]);
 
     double XcheckNegDir[2];
-    XcheckNegDir[0] = startarg[0]-0.305;
+    XcheckNegDir[0] = startarg[0]-((0.305/2)+0.1);
     XcheckNegDir[1] = startarg[1];
     // printf("XcheckNegDir (%f, %f)\n", XcheckNegDir[0], XcheckNegDir[1]);
 
 
     double Ycheck[2];
     Ycheck[0] = startarg[0];
-    Ycheck[1] = startarg[1]+0.305;
+    Ycheck[1] = startarg[1]+((0.305/2)+0.1);
     // printf("Ycheck (%f, %f)\n", Ycheck[0], Ycheck[1]);
 
     double YcheckNegDir[2];
     YcheckNegDir[0] = startarg[0];
-    YcheckNegDir[1] = startarg[1]-0.305;
+    YcheckNegDir[1] = startarg[1]-((0.305/2)+0.1);
     // printf("YcheckNegDir (%f, %f)\n", YcheckNegDir[0], YcheckNegDir[1]);
 
     double XXdistance;
@@ -525,12 +411,11 @@ void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTA
     double tempArr[2];
     int j;
     for(j=0; j<i; j++){
-        tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0]-0.305; //avoid obstacle by .305 offset
-        tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1]-0.305; //avoid obstacle by .305 offset
+        tempArr[0] =  obstaclesPositions[alreadyFoundObstacle[j]][0]-((0.305/2)+0.1); //avoid obstacle by .305 offset
+        tempArr[1] =  obstaclesPositions[alreadyFoundObstacle[j]][1]-((0.305/2)+0.1); //avoid obstacle by .305 offset
 //        printf("\n%d: (%f, %f) - ",j+1,obstaclesPositions[alreadyFoundObstacle[j]][0],obstaclesPositions[alreadyFoundObstacle[j]][1]);
-         
-        changeDirn(startPosition,tempArr);
 
+         changeDirn(startPosition,tempArr);
          // Xfirst_moveX1Y1toX2Y2(startPosition,tempArr);
 //        printf("move from (%f, %f) to (%f, %f)", startPosition[0], startPosition[1], tempArr[0], tempArr[1]);
         startPosition[0]=tempArr[0];
@@ -544,26 +429,6 @@ void avoidObstacles(double startPosition[2], double obstaclesPositions[MAX_OBSTA
 
 //--------------------------------------------------------------------------------------------------------
 
-//-----------------recursion segment------------------------
-//------break distances on the multiple of 0.305 and keep changing directions if there is obstacle next to start until you reach goal-----
-// void distanceRecursion(){
-
-// }
-
-    // double breakDistanceArr[2];
-    
-    // double XXXdistance = goalLocation[0]-initialLocation[0];
-    // if (XXXdistance<0){
-    //     XXXdistance = XXXdistance*(-1);
-    // }
-
-    // int vnum;
-    // for (vnum=0; vnum<(XXXdistance/0.305); vnum++){
-    //     moveAlongXaxis(initialLocation, )
-    // }
-
-
-//--------------------------------------------------------
 
 int main(void)
 {
